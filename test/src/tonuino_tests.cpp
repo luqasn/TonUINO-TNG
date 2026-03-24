@@ -1247,9 +1247,9 @@ TEST_F(tonuino_test_fixture, end_play_after_2_track_hoerbuch_1) {
   card_out();
 }
 
-TEST_F(tonuino_test_fixture, hoerbuch_rnd_shuffles) {
+TEST_F(tonuino_test_fixture, hoerbuch_vb_shuffles) {
   randomSeed(16);
-  folderSettings card = { 5, pmode_t::hoerbuch_rnd, 1, 10 };
+  folderSettings card = { 5, pmode_t::hoerbuch_vb, 1, 10 };
   uint8_t track_count = 10;
   uint8_t first_folder = 5;
   uint8_t second_folder = 4;
@@ -1299,9 +1299,9 @@ TEST_F(tonuino_test_fixture, hoerbuch_rnd_shuffles) {
   EXPECT_EQ(getMp3().df_folder_track, 1);
 }
 
-TEST_F(tonuino_test_fixture, hoerbuch_rnd_test_resume) {
+TEST_F(tonuino_test_fixture, hoerbuch_vb_resumes) {
   randomSeed(16);
-  folderSettings card = { 1, pmode_t::hoerbuch_rnd, 1, 10 };
+  folderSettings card = { 1, pmode_t::hoerbuch_vb, 1, 10 };
   folderSettings other_card = { 10, pmode_t::album, 0, 0 };
   uint8_t track_count = 10;
   uint8_t number_of_tracks_to_play = 5;
