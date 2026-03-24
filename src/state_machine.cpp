@@ -21,6 +21,7 @@ const __FlashStringHelper* str_ChFolder                () { return F("ChFold") ;
 const __FlashStringHelper* str_ChTrack                 () { return F("ChTr") ; }
 const __FlashStringHelper* str_ChFirstTrack            () { return F("ChFTr") ; }
 const __FlashStringHelper* str_ChLastTrack             () { return F("ChLTr") ; }
+const __FlashStringHelper* str_ChLastFolder            () { return F("ChLFold") ; }
 const __FlashStringHelper* str_ChNumAnswer             () { return F("ChNumAnsw") ; }
 const __FlashStringHelper* str_ChNumTracks             () { return F("ChNumTr") ; }
 const __FlashStringHelper* str_WriteCard               () { return F("WriteC") ; }
@@ -242,11 +243,16 @@ void ChFolder::react(command_e const &cmd_e) {
     }
     if (  ( folder.mode == pmode_t::hoerspiel_vb)
         ||( folder.mode == pmode_t::album_vb    )
-        ||( folder.mode == pmode_t::party_vb    )
-        ||( folder.mode == pmode_t::hoerbuch_vb )) {
+        ||( folder.mode == pmode_t::party_vb    )) {
       transit<ChFirstTrack>();
       return;
     }
+    if (folder.mode == pmode_t::hoerbuch_vb) {
+      folder.special = currentValue;
+      transit<ChLastFolder>();
+      return;
+    }
+
     transit<finished>();
     return;
   }
@@ -350,6 +356,39 @@ void ChLastTrack::react(command_e const &cmd_e) {
     LOG(state_log, s_debug, str_ChLastTrack(), F(": "), currentValue);
     transit<finished>();
     return;
+  }
+}
+
+// #######################################################
+
+void ChLastFolder::entry() {
+  LOG(state_log, s_info, str_enter(), str_ChLastFolder());
+
+  numberOfOptions   = 99;
+  startMessage      = mp3Tracks::t_301_select_folder;
+  messageOffset     = mp3Tracks::t_0;
+  preview           = true;
+  previewFromFolder = 0;
+
+  VoiceMenu::entry();
+  currentValue      = folder.folder + 1;
+}
+
+void ChLastFolder::react(command_e const &cmd_e) {
+  if (cmd_e.cmd_raw != commandRaw::none) {
+    LOG(state_log, s_debug, str_ChLastFolder(), F("::react() "), static_cast<int>(cmd_e.cmd_raw));
+  }
+  const command cmd = commands.getCommand(cmd_e.cmd_raw, state_for_command::admin);
+
+  VoiceMenu::react(cmd);
+
+  if (isAbort(cmd))
+    return;
+
+  if (Commands::isSelect(cmd) && (currentValue != 0)) {
+    folder.special2 = currentValue;
+    LOG(state_log, s_debug, str_ChLastFolder(), F(": "), currentValue);
+    transit<finished>();
   }
 }
 

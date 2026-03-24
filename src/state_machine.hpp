@@ -251,6 +251,13 @@ public:
   void react(command_e const &) final;
 };
 
+class ChLastFolder : public VoiceMenu_setupCard
+{
+public:
+  void entry() final;
+  void react(command_e const &) final;
+};
+
 class ChLastTrack : public VoiceMenu_setupCard
 {
 public:
