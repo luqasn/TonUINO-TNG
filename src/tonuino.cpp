@@ -376,9 +376,17 @@ void Tonuino::playFolder() {
     LOG(play_log, s_debug, F("Hörbuch random"));
     LOG(play_log, s_debug, first_track, str_bis(), last_track);
 
-
-    if (previousFolder.folder != myFolder.folder) {
-      // other card read
+    // same card read again, play next track
+    if (previousFolder.mode == pmode_t::hoerbuch_vb && previousFolder.special == myFolder.special && previousFolder.special2 == myFolder.special2) {
+      settings.writeFolderSettingToFlash(previousFolder.folder, 0);
+      for (uint8_t i = 0; i<random_folder.size(); ++i) {
+        if (random_folder.get(i) == previousFolder.folder) {
+          myFolder.folder = random_folder.get((i + 1) % random_folder.size());
+          break;
+        }
+      }
+    } else {
+      // other card read, create new shuffle order and play random folder
       myFolder.folder = 0;
       random_folder.clear();
       for (uint8_t i = first_random_folder; i <= last_random_folder; i++) {
@@ -395,14 +403,6 @@ void Tonuino::playFolder() {
 
       if (myFolder.folder == 0) {
         myFolder.folder = random_folder.get(0);
-      }
-    } else {
-      settings.writeFolderSettingToFlash(previousFolder.folder, 0);
-      for (uint8_t i = 0; i<random_folder.size(); ++i) {
-        if (random_folder.get(i) == previousFolder.folder) {
-          myFolder.folder = random_folder.get((i + 1) % random_folder.size());
-          break;
-        }
       }
     }
     uint16_t startTrack = settings.readFolderSettingFromFlash(myFolder.folder);
