@@ -1349,3 +1349,28 @@ TEST_F(tonuino_test_fixture, hoerbuch_vb_resumes) {
   EXPECT_EQ(getMp3().df_folder, first_folder);
   EXPECT_EQ(getMp3().df_folder_track, number_of_tracks_to_play + 1);
 }
+
+TEST_F(tonuino_test_fixture, hoerbuch_vb_plays_all) {
+  randomSeed(16);
+  folderSettings card = { 1, pmode_t::hoerbuch_vb, 1, 10 };
+  std::vector<bool> played(card.special2 - card.special + 1);
+
+  for (uint8_t i = card.special; i <= card.special2; ++i) {
+    card_in(card);
+    leave_start_play();
+    execute_cycle_for_ms(time_check_play);
+    EXPECT_TRUE(getMp3().is_playing_folder());
+    played[getMp3().df_folder - 1] = true;
+    EXPECT_EQ(getMp3().df_folder_track, 1);
+
+    card_out();
+
+    // getMp3().end_track();
+    execute_cycle();
+    // EXPECT_TRUE(getMp3().is_pause());
+  }
+
+  for (uint8_t i = card.special; i <= card.special2; ++i) {
+    EXPECT_TRUE(played[i-1]);
+  }
+}
