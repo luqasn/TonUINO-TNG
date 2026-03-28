@@ -405,6 +405,8 @@ void Tonuino::playFolder() {
         myFolder.folder = random_folder.get(0);
       }
     }
+    numTracksInFolder = mp3.getFolderTrackCount(myFolder.folder);
+    last_track  = numTracksInFolder;
     uint16_t startTrack = settings.readFolderSettingFromFlash(myFolder.folder);
     if ((startTrack < first_track) || (startTrack > last_track))
       startTrack = first_track;
