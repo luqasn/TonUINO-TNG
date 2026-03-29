@@ -1270,3 +1270,54 @@ TEST_F(tonuino_test_fixture, hoerbuch_multi_folder_shuffles_when_presenting_card
     card_out();
   }
 }
+
+TEST_F(tonuino_test_fixture, hoerbuch_multi_folder_resumes_playing_where_left_off) {
+  randomSeed(16);
+  folderSettings card = { 1, pmode_t::hoerbuch, 0, 10 };
+  folderSettings other_card = { 10, pmode_t::album, 0, 0 };
+  uint8_t track_count = 10;
+  uint8_t number_of_tracks_to_play = 5;
+  uint8_t first_folder = 6;
+
+  card_in(card, track_count);
+
+  leave_start_play();
+
+  for (uint8_t i = 1; i <= number_of_tracks_to_play; ++i) {
+    execute_cycle_for_ms(time_check_play);
+    EXPECT_TRUE(getMp3().is_playing_folder());
+    EXPECT_EQ(getMp3().df_folder, first_folder);
+    EXPECT_EQ(getMp3().df_folder_track, i);
+
+    getMp3().end_track();
+    execute_cycle();
+    EXPECT_TRUE(getMp3().is_pause());
+  }
+
+
+  card_out();
+
+
+  card_in(other_card, track_count);
+  EXPECT_TRUE(SM_tonuino::is_in_state<StartPlay<Play>>());
+
+  leave_start_play();
+
+  execute_cycle_for_ms(time_check_play);
+  EXPECT_TRUE(getMp3().is_playing_folder());
+  EXPECT_EQ(getMp3().df_folder, other_card.folder);
+  EXPECT_EQ(getMp3().df_folder_track, 1);
+
+  card_out();
+
+  card_in(card, track_count);
+  EXPECT_TRUE(SM_tonuino::is_in_state<StartPlay<Play>>());
+
+  leave_start_play();
+
+  // should resume where card was left off playing
+  execute_cycle_for_ms(time_check_play);
+  EXPECT_TRUE(getMp3().is_playing_folder());
+  EXPECT_EQ(getMp3().df_folder, first_folder);
+  EXPECT_EQ(getMp3().df_folder_track, number_of_tracks_to_play + 1);
+}
