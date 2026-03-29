@@ -411,6 +411,10 @@ void Tonuino::playFolder() {
     // Nothing to enqueue here
     break;
   }
+
+  if (myFolder.mode != pmode_t::hoerbuch && myFolder.mode != pmode_t::hoerbuch_1) {
+    folderForHoerbuch = 0;
+  }
 }
 
 void Tonuino::playTrackNumber () {
