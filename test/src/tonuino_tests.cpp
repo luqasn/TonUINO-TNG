@@ -1247,3 +1247,26 @@ TEST_F(tonuino_test_fixture, end_play_after_2_track_hoerbuch_1) {
   card_out();
 }
 
+TEST_F(tonuino_test_fixture, hoerbuch_multi_folder_shuffles_when_presenting_card_repeatedly) {
+  randomSeed(16);
+  folderSettings card = { 5, pmode_t::hoerbuch, 0, 5 };
+  uint8_t folders[] = {5, 8, 8, 9, 8};
+
+
+  for (const uint8_t f : folders) {
+    card_in(card);
+    EXPECT_TRUE(SM_tonuino::is_in_state<StartPlay<Play>>());
+
+    leave_start_play();
+    // play 1-1
+    execute_cycle_for_ms(time_check_play);
+    EXPECT_TRUE(getMp3().is_playing_folder());
+    EXPECT_EQ(getMp3().df_folder, f);
+    EXPECT_EQ(getMp3().df_folder_track, 1);
+
+    getMp3().end_track();
+    execute_cycle();
+
+    card_out();
+  }
+}
