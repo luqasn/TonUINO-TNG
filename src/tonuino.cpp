@@ -378,26 +378,26 @@ void Tonuino::playFolder() {
   case pmode_t::hoerbuch_1:
   // Hörbuch Modus: kompletten Ordner spielen und Fortschritt merken (oder von-bis oder nur eine Datei)
   {
+    bool sameCardReadAgain = folderForHoerbuch >= myFolder.folder && folderForHoerbuch < myFolder.folder + myFolder.special2;
+    uint8_t folderRangeCount = myFolder.mode == pmode_t::hoerbuch_vb ? 0 : myFolder.special2;
     folderForHoerbuch = 0;
-    if ((myFolder.mode != pmode_t::hoerbuch_vb) && myFolder.special2 > 0) {
-      for (uint8_t f = myFolder.folder; f <= myFolder.folder + myFolder.special2; ++f) {
-          uint8_t start = settings.readFolderSettingFromFlash(f);
+    if (!sameCardReadAgain) {
+      for (uint8_t f = myFolder.folder; f <= myFolder.folder + folderRangeCount; ++f) {
+        uint8_t start = settings.readFolderSettingFromFlash(f);
         if ((start > 1) && (start != 0xff)) {
           folderForHoerbuch = f;
           LOG(play_log, s_debug, F("Hörbuch - not finished for folder: "), folderForHoerbuch);
           break;
         }
       }
-      if (folderForHoerbuch == 0) {
-        folderForHoerbuch = random(myFolder.folder, myFolder.folder + myFolder.special2+1);
-        LOG(play_log, s_debug, F("Hörbuch - select folder: "), folderForHoerbuch);
-      }
-      numTracksInFolder = mp3.getFolderTrackCount(folderForHoerbuch);
-      LOG(play_log, s_warning, numTracksInFolder, F(" tr in folder "), folderForHoerbuch);
     }
-    else {
-      folderForHoerbuch = myFolder.folder;
+    if (folderForHoerbuch == 0) {
+      folderForHoerbuch = random(myFolder.folder, myFolder.folder + folderRangeCount + 1);
+      LOG(play_log, s_debug, F("Hörbuch - select folder: "), folderForHoerbuch);
     }
+    numTracksInFolder = mp3.getFolderTrackCount(folderForHoerbuch);
+    LOG(play_log, s_warning, numTracksInFolder, F(" tr in folder "), folderForHoerbuch);
+
     LOG(play_log, s_debug, F("Hörbuch"));
     LOG(play_log, s_debug, first_track, str_bis(), last_track);
     uint16_t startTrack = settings.readFolderSettingFromFlash(folderForHoerbuch);
